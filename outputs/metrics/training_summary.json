@@ -1,0 +1,7 @@
+{
+  "provider_model": "logistic_regression",
+  "provider_threshold": 0.5,
+  "synthetic_model": "synthetic_random_forest",
+  "synthetic_threshold": 0.3,
+  "raw_data_dir": "/Users/amoux/Desktop/Healthcare Project/data/raw"
+}
