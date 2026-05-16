@@ -1,11 +1,19 @@
 # AI-Powered Healthcare Insurance Fraud Detection System
 
+> **BUDT751 — Information Systems Program**
+> Robert H. Smith School of Business, University of Maryland
+> Spring 2026 · Group 1
+
+**Team Members:** Anirudh Patil · Anish Tumla · Arya Kadarkar · Ashley Lun · Dhvani Khatri · Rishika Methi · Venkat Gollangi
+
+---
+
 This project builds a practical, business-friendly fraud detection workflow for healthcare claims and providers. The main model uses the Kaggle `Healthcare Provider Fraud Detection Analysis` dataset to predict whether a provider is potentially fraudulent. A second synthetic claim-level model is included for comparison and for an easier Streamlit demo experience.
 
 ## Project Structure
 
 ```text
-healthcare-fraud-ai/
+Healthcare Project/
 ├── data/
 │   ├── raw/
 │   ├── processed/
@@ -23,6 +31,8 @@ healthcare-fraud-ai/
 │   ├── generate_demo_data.py
 ├── streamlit_app/
 │   ├── app.py
+├── .streamlit/
+│   └── config.toml
 ├── models/
 ├── outputs/
 │   ├── charts/
@@ -34,7 +44,7 @@ healthcare-fraud-ai/
 
 ## Where To Place Raw Data
 
-Place the Kaggle CSV files in [data/raw](/Users/amoux/Desktop/Healthcare%20Project/data/raw). The code is flexible and can also discover the files if they are still in `Dataset/` or the repo root, but `data/raw` is the intended location.
+Place the Kaggle CSV files in `data/raw`. The code is flexible and can also discover the files if they are still in `Dataset/` or the repo root, but `data/raw` is the intended location.
 
 Expected source files:
 
@@ -44,22 +54,25 @@ Expected source files:
 - `Train...csv` with provider fraud labels
 - `synthetic_health_claims.csv`
 
+> **Note:** The large model file `models/synthetic_claim_fraud_model.joblib` (184MB) is excluded from this repo due to GitHub's file size limit. Run the training pipeline to regenerate it locally.
+
 ## What The Project Does
 
 - Builds provider-level features from inpatient, outpatient, beneficiary, and provider-label data.
 - Trains and compares Logistic Regression, Random Forest, and XGBoost if installed, with sklearn boosting fallback if not.
 - Evaluates fraud detection with accuracy, precision, recall, F1, ROC-AUC, confusion matrix, ROC curve, and precision-recall curve.
 - Tests business thresholds at `0.30`, `0.50`, and `0.70`.
-- Applies a Decision Automation Engine that converts fraud probabilities into operational routing actions such as auto approve, secondary rules check, human review queue, priority investigation, and payment hold plus mandatory investigator review.
-- Saves trained models in [models](/Users/amoux/Desktop/Healthcare%20Project/models).
-- Exports charts and metrics to [outputs](/Users/amoux/Desktop/Healthcare%20Project/outputs).
-- Includes a Streamlit app for manual and batch fraud scoring.
+- Applies a Decision Automation Engine that converts fraud probabilities into five operational routing actions: auto approve, secondary rules check, human review queue, priority investigation, and payment hold + mandatory investigator review.
+- Saves trained models in `models/`.
+- Exports charts and metrics to `outputs/`.
+- Includes a dark-themed Streamlit dashboard (Command Center) for manual and batch fraud scoring.
 
 ## Setup
 
 ```bash
 python3 -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate        # Mac/Linux
+# .venv\Scripts\activate         # Windows
 pip install -r requirements.txt
 ```
 
@@ -85,7 +98,7 @@ Open the notebooks:
 jupyter notebook
 ```
 
-Launch the Streamlit app:
+Launch the Streamlit dashboard:
 
 ```bash
 streamlit run streamlit_app/app.py
@@ -93,104 +106,91 @@ streamlit run streamlit_app/app.py
 
 ## How To Use The App
 
-Recommended team workflow:
-
-1. Launch the app with:
-
-```bash
-streamlit run streamlit_app/app.py
-```
-
-2. Open `Batch Scoring` first.
-3. Upload one of the test files from [data/demo](/Users/amoux/Desktop/Healthcare%20Project/data/demo).
-4. If the file is already scored, the dashboard will use those scores directly.
+1. Launch the app with `streamlit run streamlit_app/app.py`
+2. Open **Batch Scoring** first.
+3. Upload one of the test files from `data/demo/`.
+4. If the file already contains model scores, the dashboard will use them directly.
 5. If the file is raw claim data, click the scoring button so the saved model can score it.
-6. After a file is loaded, it stays active across the dashboard tabs during that session.
-7. Move through the other pages to review fraud risk, routing decisions, case details, model performance, business impact, and responsible AI controls.
+6. After a file is loaded, it stays active across all dashboard tabs for that session.
+7. Navigate through the pages using the **Command Center** sidebar.
 
 Recommended test files:
 
-- [demo_upload_scored_claims.csv](/Users/amoux/Desktop/Healthcare%20Project/data/demo/demo_upload_scored_claims.csv)
-  Use this to test the already-scored upload flow.
-- [demo_upload_raw_synthetic_claims.csv](/Users/amoux/Desktop/Healthcare%20Project/data/demo/demo_upload_raw_synthetic_claims.csv)
-  Use this to test the raw upload plus model-scoring flow.
-- [demo_scored_claims.csv](/Users/amoux/Desktop/Healthcare%20Project/data/demo/demo_scored_claims.csv)
-  Use this as the larger presentation dataset if you want a fuller dashboard view.
+- `data/demo/demo_upload_scored_claims.csv` — test the already-scored upload flow (fastest)
+- `data/demo/demo_upload_raw_synthetic_claims.csv` — test the raw upload + model-scoring flow
+- `data/demo/demo_scored_claims.csv` — larger presentation dataset for a fuller dashboard view
+
+## Dashboard Pages
+
+The sidebar is split into two sections:
+
+**Main navigation:**
+
+| Page | Description |
+|------|-------------|
+| Overview | Fraud command-center with KPIs, risk distribution, decision action charts, and top risky cases |
+| Batch Scoring | Upload and score new claims; filter, review, and download results |
+| Decision Engine | Editable threshold routing with secondary rules for borderline claims; live routing summary |
+| Case Review | Investigator-style deep-dive into a single high-risk claim with risk gauge and contributing features |
+| Business Impact | Interactive calculator for fraud savings vs. review cost with monthly and annual projections |
+| Responsible AI | Human-in-the-loop rules, false positive/negative costs, bias risks, and mitigation controls |
+
+**Technical Reference** (collapsed expander at the bottom of the sidebar):
+
+| Page | Description |
+|------|-------------|
+| Model Insights | Model leaderboard, confusion matrix, ROC curve, precision-recall curve, and feature importance |
+| About | Business framing, datasets used, AI approach, model selection, limitations, and future roadmap |
 
 ## Dashboard Demo Walkthrough
 
-Suggested professor/video flow:
+Suggested professor/presentation flow:
 
-1. Start on `Overview` and explain the fraud risk summary, high-risk queue, and estimated exposure.
-2. Go to `Batch Scoring` and show how a new file can be uploaded and scored.
-3. Go to `Case Review` and open one suspicious claim.
-4. Explain why the model flagged the claim using the risk driver and supporting features.
-5. Go to `Model Insights` and explain model performance using recall, precision, F1, ROC-AUC, and threshold tuning.
-6. Go to `Business Impact` and show estimated fraud savings versus review cost.
-7. End with `Responsible AI` and explain human-review safeguards.
+1. Start on **Overview** — explain the fraud risk summary, high-risk queue, and estimated exposure.
+2. Go to **Batch Scoring** — show uploading and scoring a new file.
+3. Go to **Case Review** — open a suspicious claim and explain the risk driver and contributing features.
+4. Go to **Decision Engine** — show threshold controls and how probabilities map to routing actions.
+5. Go to **Business Impact** — walk through fraud savings vs. review cost estimates.
+6. End with **Responsible AI** — explain human-review safeguards and fairness controls.
+7. Expand **Technical Reference → Model Insights** for the technical model performance deep-dive.
 
-For the cleanest walkthrough, upload [demo_scored_claims.csv](/Users/amoux/Desktop/Healthcare%20Project/data/demo/demo_scored_claims.csv) in `Batch Scoring` first, then move through the rest of the pages.
-
-## Presentation Mode
-
-The sidebar includes a `Presentation Mode` toggle for cleaner professor walkthroughs.
-
-When enabled, the dashboard:
-
-- shows fewer rows in tables
-- hides or reduces advanced filters where possible
-- keeps the pages cleaner for video demos
-- emphasizes the most important KPIs and visuals first
-
-## Notebook Purpose
-
-- `01_main_provider_fraud_model.ipynb`: main business model using provider-level fraud prediction.
-- `02_synthetic_claim_demo_model.ipynb`: claim-level comparison model using the synthetic dataset.
-
-## Streamlit Pages
-
-- `Overview`: fraud command-center summary with KPIs, charts, and top risky cases
-- `Batch Scoring`: upload and score new claims or review the built-in demo file
-- `Decision Engine`: editable threshold routing layer with secondary rules for borderline claims
-- `Case Review`: investigator-style view of one suspicious claim
-- `Model Insights`: model metrics, charts, and threshold comparison
-- `Business Impact`: interactive savings and cost calculator
-- `Responsible AI`: human-in-the-loop and fairness guardrails
-- `About`: business framing, datasets, approach, limitations, and future roadmap
-
-## Upload Behavior
-
-- The app does not auto-load a dataset on startup.
-- A dataset becomes active after you upload a scored CSV, or after you upload a raw CSV and run model scoring.
-- Once loaded, that dataset stays active across tabs for the rest of the session.
-- The sidebar status area shows:
-  - whether uploaded data is loaded
-  - total records
-  - human reviews required
-  - payment holds
+For the cleanest walkthrough, upload `demo_scored_claims.csv` in Batch Scoring first, then navigate through the pages.
 
 ## Presentation Mode
 
-Use the `Presentation Mode` checkbox in the sidebar when recording or presenting.
+The sidebar includes a **Presentation Mode** toggle. When enabled it reduces visible table rows, hides advanced filters, and keeps pages cleaner for video demos and live walkthroughs.
 
-It:
+## Model Performance
 
-- reduces visible table rows
-- hides some advanced filters
-- keeps the pages cleaner for a walkthrough
-- emphasizes KPIs and charts over detailed data grids
+| Model | ROC-AUC | Recall | Precision | F1 |
+|-------|---------|--------|-----------|-----|
+| Provider Fraud (Logistic Regression) | 0.951 | 0.874 | 0.442 | 0.587 |
+| Synthetic Claim Fraud (Random Forest) | 0.837 | 0.540 | 0.730 | 0.621 |
+
+## Decision Engine Routing
+
+| Fraud Probability | Tier | Action |
+|---|---|---|
+| < 0.40 | Low Risk | Auto Approve |
+| 0.40 – 0.60 | Borderline | Secondary Rules Check |
+| 0.60 – 0.70 | Elevated | Human Review Queue |
+| 0.70 – 0.90 | High Risk | Priority Investigation |
+| > 0.90 | Critical | Payment Hold + Mandatory Investigator Review |
+
+Claims over $10,000 require human review regardless of score.
 
 ## Troubleshooting
 
-- If the dashboard pages look empty, go to `Batch Scoring` and upload a dataset first.
-- If a raw upload does not score, use the scoring diagnostics section on `Batch Scoring` to see which model-input columns are missing.
-- If you only want to test the UI path, upload `demo_upload_scored_claims.csv`.
-- If you want to test the full model-scoring path, upload `demo_upload_raw_synthetic_claims.csv`.
+- If dashboard pages look empty, go to **Batch Scoring** and upload a dataset first.
+- If a raw upload does not score, use the scoring diagnostics expander on Batch Scoring to see which model-input columns are missing.
+- To test just the UI, upload `demo_upload_scored_claims.csv`.
+- To test the full model-scoring path, upload `demo_upload_raw_synthetic_claims.csv`.
+- If the sidebar looks dark/invisible, make sure `.streamlit/config.toml` exists in the project root.
 
 ## Limitations
 
 - The primary Kaggle dataset predicts provider-level risk, not final legal fraud findings.
 - Fraud labels are imbalanced, so precision and recall tradeoffs matter more than raw accuracy.
-- The synthetic dataset is useful for demos, but it is not real claims data.
+- The synthetic dataset is useful for demos but is not real claims data.
 - A flagged claim or provider should trigger human investigation, not an autonomous payment decision.
-- Results may vary if raw files use different column names or missing fields, though the code is built to handle common schema differences gracefully.
+- Results may vary if raw files use different column names or missing fields, though the code handles common schema differences gracefully.
